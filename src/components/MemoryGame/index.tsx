@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { cn } from "../../utils";
-import { shuffle } from "lodash";
+import { set, shuffle } from "lodash";
 import { isObjectInArray } from "../../utils/object";
 
 export type CardType = { id: string; image: string };
+export type FlashCardType = CardType & { type: "correct" | "incorrect" };
 
 function MemoryGame({ images }: { images: string[] }) {
   // 6 image pairs - 12 cards that start "flipped down"
@@ -36,6 +37,20 @@ function MemoryGame({ images }: { images: string[] }) {
 
   const [pairs, setPairs] = useState<CardType[]>([]);
   const [clickedCards, setClickedCards] = useState<CardType[]>([]);
+  const [flashCards, setFlashCards] = useState<FlashCardType[]>([]);
+
+  const handleFlash = (
+    clickedCards: CardType[],
+    type: "correct" | "incorrect"
+  ) => {
+    setFlashCards((prev) => [
+      ...prev,
+      ...clickedCards.map((card) => ({ ...card, type })),
+    ]);
+    setTimeout(() => {
+      setFlashCards([]);
+    }, 1000);
+  };
   const handleCardClick = (clickedCard: CardType) => {
     // cases to account for:
     // there are no clicked cards
@@ -69,10 +84,17 @@ function MemoryGame({ images }: { images: string[] }) {
         })
       ) {
         setPairs((prev) => [...prev, clickedCard]);
+        handleFlash([...clickedCards, clickedCard], "correct");
       }
       setTotalGuesses((prev) => prev + 1);
+
+      // set the flash
+      // for all the clicked cards, set a flash
+      handleFlash([...clickedCards, clickedCard], "incorrect");
       // reset the state after a delay
-      setTimeout(() => setClickedCards([]), 2000);
+      setTimeout(() => {
+        setClickedCards([]);
+      }, 1000);
     }
 
     // setClickedCards((prev) =>
@@ -113,25 +135,34 @@ function MemoryGame({ images }: { images: string[] }) {
   }, [pairs]);
 
   return (
-    <div className="grid grid-cols-4 gap-2">
-      {randomizedCards.length > 0 &&
-        randomizedCards.map((card) => (
-          <Card
-            card={card}
-            isVisible={
-              isObjectInArray({
-                array: clickedCards,
-                key: "id",
-                value: card.id,
-              }) ||
-              isObjectInArray({ array: pairs, key: "image", value: card.image })
-            }
-            key={card.id}
-            handleCardClick={handleCardClick}
-          />
-        ))}
-      <p>{message ? message : `Pairs: ${pairs.length}`}</p>
-      <p>Total Guesses: {totalGuesses}</p>
+    <div>
+      <div className="grid grid-cols-4 gap-2">
+        {randomizedCards.length > 0 &&
+          randomizedCards.map((card) => (
+            <Card
+              card={card}
+              isVisible={
+                isObjectInArray({
+                  array: clickedCards,
+                  key: "id",
+                  value: card.id,
+                }) ||
+                isObjectInArray({
+                  array: pairs,
+                  key: "image",
+                  value: card.image,
+                })
+              }
+              key={card.id}
+              handleCardClick={handleCardClick}
+              flashCard={flashCards.find((c) => c.id === card.id) || null}
+            />
+          ))}
+      </div>
+      <footer className="mt-4 flex justify-center gap-4 p-4">
+        <p>{message ? message : `Pairs: ${pairs.length}`}</p>
+        <p>Total Guesses: {totalGuesses}</p>
+      </footer>
     </div>
   );
 }
@@ -142,14 +173,23 @@ function Card({
   card,
   isVisible,
   handleCardClick,
+  flashCard,
 }: {
   card: CardType;
   isVisible?: boolean;
   handleCardClick: (card: CardType) => void;
+  flashCard: FlashCardType | null;
 }) {
   return (
     <div
-      className={cn("w-32 h-32 relative")}
+      className={cn(
+        "w-32 h-32 relative border-4 border-gray-500",
+        flashCard?.type === "correct"
+          ? "border-green-500"
+          : flashCard?.type === "incorrect"
+          ? "border-red-500"
+          : ""
+      )}
       onClick={() => handleCardClick(card)}
     >
       <img

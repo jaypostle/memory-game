@@ -1,13 +1,15 @@
 export const isObjectInArray = ({
   array,
-  id,
+  key,
+  value,
 }: {
   array: any[];
-  id: string;
+  key: string;
+  value: string;
 }) => {
   try {
     if (!array) return false;
-    return array.some((item) => item.id === id);
+    return array.some((item) => item[key] === value);
   } catch (err) {
     console.log(err);
     return false;

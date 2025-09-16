@@ -22,6 +22,7 @@ function MemoryGame({ images }: { images: string[] }) {
   // Functions:
   // handle card click that takes the card uuid and handles the matching
   const [message, setMessage] = useState("");
+  const [totalGuesses, setTotalGuesses] = useState(0);
   const randomizedCards = useMemo(() => {
     // make pairs for all the images
 
@@ -69,6 +70,7 @@ function MemoryGame({ images }: { images: string[] }) {
       ) {
         setPairs((prev) => [...prev, clickedCard]);
       }
+      setTotalGuesses((prev) => prev + 1);
       // reset the state after a delay
       setTimeout(() => setClickedCards([]), 2000);
     }
@@ -95,6 +97,7 @@ function MemoryGame({ images }: { images: string[] }) {
   const resetGame = () => {
     setPairs([]);
     setClickedCards([]);
+    setTotalGuesses(0);
   };
 
   useEffect(() => {
@@ -128,6 +131,7 @@ function MemoryGame({ images }: { images: string[] }) {
           />
         ))}
       <p>{message ? message : `Pairs: ${pairs.length}`}</p>
+      <p>Total Guesses: {totalGuesses}</p>
     </div>
   );
 }
@@ -155,7 +159,8 @@ function Card({
       />
       <div
         className={cn(
-          "absolute inset-0 bg-gray-500 opacity-75",
+          "absolute inset-0 bg-gray-500",
+          //   opacity-75
           isVisible ? "hidden" : ""
         )}
       ></div>

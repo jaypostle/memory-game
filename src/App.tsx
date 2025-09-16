@@ -1,35 +1,23 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import "./App.css";
+import MemoryGame from "./components/MemoryGame";
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      <div className="App">
+        <MemoryGame
+          images={[
+            "https://images.unsplash.com/photo-1626808642875-0aa545482dfb",
+            "https://images.unsplash.com/photo-1546842931-886c185b4c8c",
+            "https://images.unsplash.com/photo-1520763185298-1b434c919102",
+            "https://images.unsplash.com/photo-1442458017215-285b83f65851",
+            "https://images.unsplash.com/photo-1496483648148-47c686dc86a8",
+            "https://images.unsplash.com/photo-1591181520189-abcb0735c65d",
+          ]}
+        />
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
-  )
+  );
 }
 
-export default App
+export default App;

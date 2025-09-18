@@ -1,7 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "../../utils";
 import { shuffle } from "lodash";
-import { isObjectInArray } from "../../utils/object";
 
 export type CardType = { id: string; image: string };
 export type FlashCardType = CardType & { type: "correct" | "incorrect" };
@@ -24,16 +23,27 @@ function MemoryGame({ images }: { images: string[] }) {
   // handle card click that takes the card uuid and handles the matching
   const [message, setMessage] = useState("");
   const [totalGuesses, setTotalGuesses] = useState(0);
-  const randomizedCards = useMemo(() => {
-    // make pairs for all the images
 
+  const randomizeCards = () => {
     const fullset = [...images, ...images].map((image) => ({
       id: self.crypto.randomUUID(),
       image,
     }));
 
     return shuffle(fullset);
-  }, [images]);
+  };
+  const [randomizedCards] = useState<CardType[]>(() => randomizeCards());
+
+  // const randomizedCards = useMemo(() => {
+  //   // make pairs for all the images
+
+  //   const fullset = [...images, ...images].map((image) => ({
+  //     id: self.crypto.randomUUID(),
+  //     image,
+  //   }));
+
+  //   return shuffle(fullset);
+  // }, [images]);
 
   const [pairs, setPairs] = useState<CardType[]>([]);
   const [clickedCards, setClickedCards] = useState<CardType[]>([]);
@@ -59,16 +69,10 @@ function MemoryGame({ images }: { images: string[] }) {
     // handle the delay after guessing wrong and then quickly clicking again before 2 seconds is over
 
     // if card is already in pairs, do nothing
-    if (
-      isObjectInArray({ array: pairs, value: clickedCard.image, key: "image" })
-    )
-      return;
+    if (pairs.some((card) => card.image === clickedCard.image)) return;
 
     // if you clicked the same card twice
-    if (
-      isObjectInArray({ array: clickedCards, key: "id", value: clickedCard.id })
-    )
-      return;
+    if (clickedCards.some((card) => card.id === clickedCard.id)) return;
 
     if (clickedCards.length === 0) {
       // simply add the card to the clickedCards array
@@ -76,13 +80,7 @@ function MemoryGame({ images }: { images: string[] }) {
     } else {
       setClickedCards((prev) => [...prev, clickedCard]);
       // check if the current card matches
-      if (
-        isObjectInArray({
-          array: clickedCards,
-          key: "image",
-          value: clickedCard.image,
-        })
-      ) {
+      if (clickedCards.some((card) => card.image === clickedCard.image)) {
         setPairs((prev) => [...prev, clickedCard]);
         handleFlash([...clickedCards, clickedCard], "correct");
       }
@@ -142,16 +140,8 @@ function MemoryGame({ images }: { images: string[] }) {
             <Card
               card={card}
               isVisible={
-                isObjectInArray({
-                  array: clickedCards,
-                  key: "id",
-                  value: card.id,
-                }) ||
-                isObjectInArray({
-                  array: pairs,
-                  key: "image",
-                  value: card.image,
-                })
+                clickedCards.some((c) => c.id === card.id) ||
+                pairs.some((c) => c.image === card.image)
               }
               key={card.id}
               handleCardClick={handleCardClick}

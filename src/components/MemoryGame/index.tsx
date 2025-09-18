@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { cn } from "../../utils";
-import { set, shuffle } from "lodash";
+import { shuffle } from "lodash";
 import { isObjectInArray } from "../../utils/object";
 
 export type CardType = { id: string; image: string };

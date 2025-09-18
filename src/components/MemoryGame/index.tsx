@@ -61,6 +61,23 @@ function MemoryGame({ images }: { images: string[] }) {
       setFlashCards([]);
     }, 1000);
   };
+
+  const resetGame = () => {
+    setPairs([]);
+    setClickedCards([]);
+    setTotalGuesses(0);
+  };
+
+  const winAndReset = () => {
+    setMessage("You won!!!");
+    // flash a winning message
+    // reset the board after a delay
+    setTimeout(() => {
+      resetGame();
+      setMessage("");
+    }, 2000);
+  };
+
   const handleCardClick = (clickedCard: CardType) => {
     // cases to account for:
     // there are no clicked cards
@@ -83,54 +100,24 @@ function MemoryGame({ images }: { images: string[] }) {
       if (clickedCards.some((card) => card.image === clickedCard.image)) {
         setPairs((prev) => [...prev, clickedCard]);
         handleFlash([...clickedCards, clickedCard], "correct");
+
+        // problem here is that the value of pairs is not yet updated after the previous setPairs call
+        if (pairs.length + 1 === images.length) {
+          winAndReset();
+        }
       }
       setTotalGuesses((prev) => prev + 1);
 
       // set the flash
       // for all the clicked cards, set a flash
       handleFlash([...clickedCards, clickedCard], "incorrect");
+
       // reset the state after a delay
       setTimeout(() => {
         setClickedCards([]);
       }, 1000);
     }
-
-    // setClickedCards((prev) =>
-    //   isObjectInArray({ array: prev, id: clickedCard.id })
-    //     ? prev.filter((card) => card.id !== clickedCard.id)
-    //     : [...prev, clickedCard]
-    // );
-    // setClickedCards((prev) => {
-    //   if (prev.includes(clickedCard)) {
-    //     return prev.filter((card) => card !== clickedCard);
-    //   } else {
-    //     return [...prev, clickedCard];
-    //   }
-    // });
-    // setClickedCards((prev) =>
-    //   prev.includes(clickedCard)
-    //     ? prev.filter((card) => card !== clickedCard)
-    //     : [...prev, clickedCard]
-    // );
   };
-
-  const resetGame = () => {
-    setPairs([]);
-    setClickedCards([]);
-    setTotalGuesses(0);
-  };
-
-  useEffect(() => {
-    if (pairs.length === images.length) {
-      setMessage("You won!!!");
-      // flash a winning message
-      // reset the board after a delay
-      setTimeout(() => {
-        resetGame();
-        setMessage("");
-      }, 2000);
-    }
-  }, [pairs]);
 
   return (
     <div>
@@ -189,7 +176,7 @@ function Card({
       />
       <div
         className={cn(
-          "absolute inset-0 bg-gray-500",
+          "absolute inset-0 bg-gray-500 opacity-75",
           //   opacity-75
           isVisible ? "hidden" : ""
         )}
